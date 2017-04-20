@@ -62,7 +62,8 @@ class DrawableCanvas extends Component {
     }
 
     if (this.state.drawCursor) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      const c = this.state.color;
+      ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.5)`;
       ctx.fillRect(this.state.x * zoom, this.state.y * zoom, zoom, zoom);
     }
   }
@@ -102,6 +103,12 @@ class DrawableCanvas extends Component {
     });
 
     setTimeout(function() { this.clearGrid() }.bind(this), 0);
+  }
+
+  setColor(r, g, b, a) {
+    this.setState((state, props) => {
+      return { color: [r, g, b, a] };
+    });
   }
 
   drawPixel() {
@@ -175,10 +182,27 @@ class DrawableCanvas extends Component {
       cursor: 'crosshair'
     };
 
+    var colorSpan = {
+      display: 'inline-block',
+      width: '16px',
+      height: '16px'
+    };
+
+    var colors = {
+      black: { ...colorSpan, background: 'black' },
+      blue: { ...colorSpan, background: 'blue' },
+      yellow: { ...colorSpan, background: 'yellow' },
+      green: { ...colorSpan, background: '#00ff00' },
+      red: { ...colorSpan, background: 'red' }
+    };
+
     var gridButtonText = this.state.drawGrid ? 'Hide Grid' : 'Show Grid';
 
     var gridStyle = { ...editorStyle, zIndex: 2 };
     var text = `(x: ${this.state.x}, y: ${this.state.y})`;
+
+    const c = this.state.color;
+    const selectedColor = { ...colorSpan, background: `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})` };
 
     const width = this.props.width * this.props.zoom;
     const height = this.props.height * this.props.zoom;
@@ -188,6 +212,17 @@ class DrawableCanvas extends Component {
       <button onClick={this.toggleGrid.bind(this)}>{gridButtonText}</button>
         <button onClick={this.exportAsJson.bind(this)}>Export as JSON</button>
         <button onClick={this.exportAsPng.bind(this)}>Export as PNG</button>
+        <div>
+          <span>Selected </span>
+          <span style={selectedColor} />
+
+          <span>Colours: </span>
+          <span style={colors.black} onClick={this.setColor.bind(this, 0, 0, 0, 255)} />
+          <span style={colors.blue} onClick={this.setColor.bind(this, 0, 0, 255, 255)} />
+          <span style={colors.red} onClick={this.setColor.bind(this, 255, 0, 0, 255)} />
+          <span style={colors.green} onClick={this.setColor.bind(this, 0, 255, 0, 255)} />
+          <span style={colors.yellow} onClick={this.setColor.bind(this, 255, 255, 0, 255)} />
+        </div>
         <div style={{ position: 'relative' }}>
           <canvas ref="editorCanvas" width={width} height={height} style={editorStyle}></canvas>
           <canvas ref="gridCanvas" width={width} height={height} style={gridStyle}></canvas>
