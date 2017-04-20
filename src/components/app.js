@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
-import DrawableCanvas from './drawable-canvas';
+import { Provider } from 'react-redux';
+import PixelCanvasContainer from './PixelCanvasContainer';
+import store from '../store';
 
 class App extends Component {
   render() {
     return (
-      <div>
-        <DrawableCanvas showCoords={true} showExport={true} />
-      </div>
+      <Provider store={store}>
+        <div>
+          <PixelCanvasContainer />
+        </div>
+      </Provider>
     );
   }
 }

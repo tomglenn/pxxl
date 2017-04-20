@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class DrawableCanvas extends Component {
+class PixelCanvas extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,8 +41,7 @@ class DrawableCanvas extends Component {
     this.gridCanvas.ctx.clearRect(0, 0, width, height);
 
     if (this.props.drawGrid) {
-      const c = this.props.gridColor;
-      ctx.strokeStyle = `rgba(0, 0, 0, 0.3)`;
+      ctx.strokeStyle = this.getColorString(this.props.gridColor);
       for (let x = 0; x < width; x += this.props.zoom) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
@@ -73,13 +72,23 @@ class DrawableCanvas extends Component {
       return { drawing: true };
     });
 
-    this.drawPixel();
+    this.useActiveTool();
   }
 
   stopDrawing() {
     this.setState((state, props) => {
       return { drawing: false };
     });
+  }
+
+  useActiveTool() {
+    if (this.props.tool == 'PEN') {
+      this.drawPixel();
+    }
+
+    if (this.props.tool == 'ERASER') {
+      this.erasePixel();
+    }
   }
 
   showCursor(show) {
@@ -103,14 +112,26 @@ class DrawableCanvas extends Component {
 
     const zoom = this.props.zoom;
     const ctx = this.editorCanvas.ctx;
+    const x = this.state.x * zoom;
+    const y = this.state.y * zoom;
 
+    this.erasePixel();
+
+    ctx.fillStyle = this.getColorString(this.props.color);
+    ctx.fillRect(x, y, zoom, zoom);
+  }
+
+  erasePixel() {
+    if (!this.editorCanvas.ctx || !this.imageData) {
+      return;
+    }
+
+    const zoom = this.props.zoom;
+    const ctx = this.editorCanvas.ctx;
     const x = this.state.x * zoom;
     const y = this.state.y * zoom;
 
     ctx.clearRect(x, y, zoom, zoom);
-
-    ctx.fillStyle = this.getColorString(this.props.color);
-    ctx.fillRect(x, y, zoom, zoom);
   }
 
   updatePosition(event) {
@@ -122,7 +143,7 @@ class DrawableCanvas extends Component {
     });
 
     if (this.state.drawing) {
-      this.drawPixel();
+      this.useActiveTool();
     }
 
     this.showCursor(true);
@@ -163,7 +184,7 @@ class DrawableCanvas extends Component {
 
   getColorString(c, a) {
     const alpha = a ? a : c[3];
-    return `rgba(${c[0], c[1], c[2], alpha/255})`;
+    return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
   }
 
   render() {
@@ -178,7 +199,7 @@ class DrawableCanvas extends Component {
     const gridStyle = { ...editorStyle, zIndex: 2 };
 
     return (
-      <div className="drawable-canvas">
+      <div className="drawable-canvas" style={{position: 'relative' }}>
         {this.props.showExport &&
           <div>
             <button onClick={this.exportAsJson.bind(this)}>Export as JSON</button>
@@ -198,15 +219,15 @@ class DrawableCanvas extends Component {
   }
 }
 
-DrawableCanvas.defaultProps = {
+PixelCanvas.defaultProps = {
   width: 50,
   height: 50,
   zoom: 10,
-  color: [0, 0, 0, 255],
+  color: [0, 0, 0, 1],
   drawGrid: true,
-  gridColor: [0, 0, 0, 100],
+  gridColor: [0, 0, 0, 0.1],
   showCoords: false,
   showExport: false,
 };
 
-export default DrawableCanvas
+export default PixelCanvas
