@@ -5,7 +5,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <DrawableCanvas width={50} height={20} zoom={20} drawGrid={true} />
+        <DrawableCanvas showCoords={true} showExport={true} />
       </div>
     );
   }

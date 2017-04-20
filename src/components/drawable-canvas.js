@@ -4,11 +4,9 @@ class DrawableCanvas extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      color: [0, 0, 0, 255],
       x: 0,
       y: 0,
       drawing: false,
-      drawGrid: this.props.drawGrid,
       drawCursor: false
     };
   }
@@ -36,24 +34,23 @@ class DrawableCanvas extends Component {
   }
 
   clearGrid() {
-    const zoom = this.props.zoom;
-    const width = this.props.width * zoom;
-    const height = this.props.height * zoom;
-
+    const width = this.getCalculatedWidth();
+    const height = this.getCalculatedHeight();
     const ctx = this.gridCanvas.ctx;
 
     this.gridCanvas.ctx.clearRect(0, 0, width, height);
 
-    if (this.state.drawGrid) {
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-      for (let x = 0; x < width; x += zoom) {
+    if (this.props.drawGrid) {
+      const c = this.props.gridColor;
+      ctx.strokeStyle = `rgba(0, 0, 0, 0.3)`;
+      for (let x = 0; x < width; x += this.props.zoom) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, height);
         ctx.stroke();
       }
 
-      for (let y = 0; y < height; y += zoom) {
+      for (let y = 0; y < height; y += this.props.zoom) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(width, y);
@@ -62,17 +59,13 @@ class DrawableCanvas extends Component {
     }
 
     if (this.state.drawCursor) {
-      const c = this.state.color;
-      ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.5)`;
-      ctx.fillRect(this.state.x * zoom, this.state.y * zoom, zoom, zoom);
+      ctx.fillStyle = this.getColorString(this.props.color, 0.5);
+      ctx.fillRect(this.state.x * this.props.zoom, this.state.y * this.props.zoom, this.props.zoom, this.props.zoom);
     }
   }
 
   clearEditor() {
-    const zoom = this.props.zoom;
-    const width = this.props.width * zoom;
-    const height = this.props.height * zoom;
-    this.editorCanvas.ctx.clearRect(0, 0, width, height);
+    this.editorCanvas.ctx.clearRect(0, 0, this.getCalculatedWidth(), this.getCalculatedHeight());
   }
 
   startDrawing() {
@@ -97,14 +90,6 @@ class DrawableCanvas extends Component {
     setTimeout(function() { this.clearGrid() }.bind(this), 0);
   }
 
-  toggleGrid() {
-    this.setState((state, props) => {
-      return { drawGrid: !state.drawGrid };
-    });
-
-    setTimeout(function() { this.clearGrid() }.bind(this), 0);
-  }
-
   setColor(r, g, b, a) {
     this.setState((state, props) => {
       return { color: [r, g, b, a] };
@@ -116,7 +101,6 @@ class DrawableCanvas extends Component {
       return;
     }
 
-    const c = this.state.color;
     const zoom = this.props.zoom;
     const ctx = this.editorCanvas.ctx;
 
@@ -125,7 +109,7 @@ class DrawableCanvas extends Component {
 
     ctx.clearRect(x, y, zoom, zoom);
 
-    ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]/255})`;
+    ctx.fillStyle = this.getColorString(this.props.color);
     ctx.fillRect(x, y, zoom, zoom);
   }
 
@@ -147,9 +131,6 @@ class DrawableCanvas extends Component {
 
   exportAsJson() {
     const ctx = this.editorCanvas.ctx;
-    const zoom = this.props.zoom;
-    const width = this.props.width * zoom;
-    const height = this.props.height * zoom;
 
     const exportedData = {
       width: this.props.width,
@@ -158,8 +139,8 @@ class DrawableCanvas extends Component {
       data: []
     };
 
-    for (let x = 0; x < width; x += zoom) {
-      for (let y = 0; y < height; y += zoom) {
+    for (let x = 0; x < this.getCalculatedWidth(); x += this.props.zoom) {
+      for (let y = 0; y < this.getCalculatedHeight(); y += this.props.zoom) {
         const id = ctx.getImageData(x, y, 1, 1).data;
         exportedData.data.push([id[0], id[1], id[2], id[3]]);
       }
@@ -172,8 +153,21 @@ class DrawableCanvas extends Component {
     window.location = this.editorCanvas.canvas.toDataURL("image/png");
   }
 
+  getCalculatedWidth() {
+    return this.props.width * this.props.zoom;
+  }
+
+  getCalculatedHeight() {
+    return this.props.height * this.props.zoom;
+  }
+
+  getColorString(c, a) {
+    const alpha = a ? a : c[3];
+    return `rgba(${c[0], c[1], c[2], alpha/255})`;
+  }
+
   render() {
-    var editorStyle = {
+    const editorStyle = {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -181,55 +175,38 @@ class DrawableCanvas extends Component {
       border: '1px solid black',
       cursor: 'crosshair'
     };
+    const gridStyle = { ...editorStyle, zIndex: 2 };
 
-    var colorSpan = {
-      display: 'inline-block',
-      width: '16px',
-      height: '16px'
-    };
-
-    var colors = {
-      black: { ...colorSpan, background: 'black' },
-      blue: { ...colorSpan, background: 'blue' },
-      yellow: { ...colorSpan, background: 'yellow' },
-      green: { ...colorSpan, background: '#00ff00' },
-      red: { ...colorSpan, background: 'red' }
-    };
-
-    var gridButtonText = this.state.drawGrid ? 'Hide Grid' : 'Show Grid';
-
-    var gridStyle = { ...editorStyle, zIndex: 2 };
-    var text = `(x: ${this.state.x}, y: ${this.state.y})`;
-
-    const c = this.state.color;
-    const selectedColor = { ...colorSpan, background: `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3]})` };
-
-    const width = this.props.width * this.props.zoom;
-    const height = this.props.height * this.props.zoom;
     return (
       <div className="drawable-canvas">
-      <div>{text}</div>
-      <button onClick={this.toggleGrid.bind(this)}>{gridButtonText}</button>
-        <button onClick={this.exportAsJson.bind(this)}>Export as JSON</button>
-        <button onClick={this.exportAsPng.bind(this)}>Export as PNG</button>
-        <div>
-          <span>Selected </span>
-          <span style={selectedColor} />
+        {this.props.showExport &&
+          <div>
+            <button onClick={this.exportAsJson.bind(this)}>Export as JSON</button>
+            <button onClick={this.exportAsPng.bind(this)}>Export as PNG</button>
+          </div>
+        }
 
-          <span>Colours: </span>
-          <span style={colors.black} onClick={this.setColor.bind(this, 0, 0, 0, 255)} />
-          <span style={colors.blue} onClick={this.setColor.bind(this, 0, 0, 255, 255)} />
-          <span style={colors.red} onClick={this.setColor.bind(this, 255, 0, 0, 255)} />
-          <span style={colors.green} onClick={this.setColor.bind(this, 0, 255, 0, 255)} />
-          <span style={colors.yellow} onClick={this.setColor.bind(this, 255, 255, 0, 255)} />
-        </div>
         <div style={{ position: 'relative' }}>
-          <canvas ref="editorCanvas" width={width} height={height} style={editorStyle}></canvas>
-          <canvas ref="gridCanvas" width={width} height={height} style={gridStyle}></canvas>
+          {this.props.showCoords &&
+            <div>(x: {this.state.x}, y: {this.state.y})</div>
+          }
+          <canvas ref="editorCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()} style={editorStyle}></canvas>
+          <canvas ref="gridCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()} style={gridStyle}></canvas>
         </div>
       </div>
     );
   }
 }
+
+DrawableCanvas.defaultProps = {
+  width: 50,
+  height: 50,
+  zoom: 10,
+  color: [0, 0, 0, 255],
+  drawGrid: true,
+  gridColor: [0, 0, 0, 100],
+  showCoords: false,
+  showExport: false,
+};
 
 export default DrawableCanvas
