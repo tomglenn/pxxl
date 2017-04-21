@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './PixelCanvas.css';
 
 class PixelCanvas extends Component {
   constructor(props) {
@@ -42,6 +43,7 @@ class PixelCanvas extends Component {
 
     if (this.props.drawGrid) {
       ctx.strokeStyle = this.getColorString(this.props.gridColor);
+
       for (let x = 0; x < width; x += this.props.zoom) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
@@ -82,11 +84,11 @@ class PixelCanvas extends Component {
   }
 
   useActiveTool() {
-    if (this.props.tool == 'PEN') {
+    if (this.props.tool === 'PEN') {
       this.drawPixel();
     }
 
-    if (this.props.tool == 'ERASER') {
+    if (this.props.tool === 'ERASER') {
       this.erasePixel();
     }
   }
@@ -188,32 +190,14 @@ class PixelCanvas extends Component {
   }
 
   render() {
-    const editorStyle = {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      zIndex: 1,
-      border: '1px solid black',
-      cursor: 'crosshair'
-    };
-    const gridStyle = { ...editorStyle, zIndex: 2 };
-
+    const style = { width: this.getCalculatedWidth(), height: this.getCalculatedHeight() };
     return (
-      <div className="drawable-canvas" style={{position: 'relative' }}>
-        {this.props.showExport &&
-          <div>
-            <button onClick={this.exportAsJson.bind(this)}>Export as JSON</button>
-            <button onClick={this.exportAsPng.bind(this)}>Export as PNG</button>
-          </div>
+      <div className="canvas-wrapper" style={style}>
+        {this.props.showCoords &&
+          <div className="canvas-coords">(x: {this.state.x}, y: {this.state.y})</div>
         }
-
-        <div style={{ position: 'relative' }}>
-          {this.props.showCoords &&
-            <div>(x: {this.state.x}, y: {this.state.y})</div>
-          }
-          <canvas ref="editorCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()} style={editorStyle}></canvas>
-          <canvas ref="gridCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()} style={gridStyle}></canvas>
-        </div>
+        <canvas className="editor-canvas" ref="editorCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()}></canvas>
+        <canvas className="grid-canvas" ref="gridCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()}></canvas>
       </div>
     );
   }
@@ -225,7 +209,7 @@ PixelCanvas.defaultProps = {
   zoom: 10,
   color: [0, 0, 0, 1],
   drawGrid: true,
-  gridColor: [0, 0, 0, 0.1],
+  gridColor: [255, 255, 255, 0.1],
   showCoords: false,
   showExport: false,
 };
