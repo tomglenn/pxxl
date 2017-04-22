@@ -13,12 +13,8 @@ class ToolsContainer extends Component {
     this.state = { showColorPicker: true };
   }
 
-  setEraser() {
-    store.dispatch({ type: 'SET_ERASER', payload: { type: 'ERASER' } });
-  }
-
-  setPen() {
-    store.dispatch({ type: 'SET_PEN', payload: { type: 'PEN' } });
+  setTool(tool) {
+    store.dispatch({ type: 'SET_TOOL', payload: tool });
   }
 
   handleColorChange(color) {
@@ -26,18 +22,27 @@ class ToolsContainer extends Component {
   }
 
   render() {
-    const c = this.props.tool.color;
-    const colorString = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
+    const c = this.props.canvas.color;
+    const colorStyle = {
+      margin: '10px auto',
+      width: '16px',
+      height: '16px',
+      background: `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`,
+      border: '1px solid #222'
+    };
+
     return (
         <div className="tools-container">
           <DraggablePanel title="Tools" x={10} y={60}>
-            <ToolButton icon="pencil" handleClick={this.setPen.bind(this)} active={ this.props.tool.type === 'PEN' } />
-            <ToolButton icon="eraser" handleClick={this.setEraser.bind(this)} active={ this.props.tool.type === 'ERASER' } />
+            <ToolButton title="Pencil" icon="pencil" handleClick={this.setTool.bind(this, 'PEN')} active={ this.props.canvas.tool === 'PEN' } />
+            <ToolButton title="Eraser" icon="eraser" handleClick={this.setTool.bind(this, 'ERASER')} active={ this.props.canvas.tool === 'ERASER' } />
+            <ToolButton title="Flood Fill" icon="tint" handleClick={this.setTool.bind(this, 'FILL')} active={ this.props.canvas.tool === 'FILL' } />
             <hr style={{ borderColor: '#666' }} />
-            <div style={{ margin: '10px auto', width: '16px', height: '16px', background: colorString, border: '1px solid #222' }}></div>
+            <div style={colorStyle}></div>
           </DraggablePanel>
+
           {this.state.showColorPicker && <DraggablePanel title="Color" x={10} y={200}>
-            <ChromePicker color={this.props.tool.color} onChangeComplete={this.handleColorChange.bind(this)} />
+            <ChromePicker color={this.props.canvas.color} onChangeComplete={this.handleColorChange.bind(this)} />
           </DraggablePanel>}
         </div>
     );
@@ -45,12 +50,12 @@ class ToolsContainer extends Component {
 }
 
 ToolsContainer.propTypes = {
-  tool: PropTypes.object
+  canvas: PropTypes.object
 };
 
 function mapStateToProps(store) {
   return {
-    tool: store.toolState
+    canvas: store.canvasState
   };
 }
 

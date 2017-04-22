@@ -1,8 +1,8 @@
 import {combineReducers, createStore} from 'redux';
-import toolReducer from './reducers/tool-reducer';
+import canvasReducer from './reducers/canvas-reducer';
 
 const reducer = combineReducers({
-  toolState: toolReducer
+  canvasState: canvasReducer
 });
 
 const store = createStore(reducer);

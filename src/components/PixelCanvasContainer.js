@@ -8,7 +8,11 @@ class PixelCanvasContainer extends Component {
   render() {
     return (
       <div className="canvas-container">
-        <PixelCanvas tool={this.props.tool.type} color={this.props.tool.color} />
+        <PixelCanvas width={this.props.canvas.width}
+                     height={this.props.canvas.height}
+                     zoom={this.props.canvas.zoom}
+                     tool={this.props.canvas.tool}
+                     color={this.props.canvas.color} />
       </div>
     );
   }
@@ -16,12 +20,12 @@ class PixelCanvasContainer extends Component {
 
 function mapStateToProps(store) {
   return {
-    tool: store.toolState
+    canvas: store.canvasState
   };
 }
 
 PixelCanvasContainer.propTypes = {
-  tool: PropTypes.object
+  canvas: PropTypes.object
 };
 
 export default connect(mapStateToProps)(PixelCanvasContainer);
