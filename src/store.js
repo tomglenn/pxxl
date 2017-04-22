@@ -1,4 +1,4 @@
-import { combineReducers, createStore } from 'redux';
+import {combineReducers, createStore} from 'redux';
 import toolReducer from './reducers/tool-reducer';
 
 const reducer = combineReducers({
