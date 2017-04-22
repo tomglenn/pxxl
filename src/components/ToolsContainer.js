@@ -22,7 +22,7 @@ class ToolsContainer extends Component {
   }
 
   handleColorChange(color) {
-    store.dispatch({ type: 'SET_COLOR', payload: color });
+    store.dispatch({ type: 'SET_COLOR', payload: color.rgb });
   }
 
   render() {
@@ -37,7 +37,7 @@ class ToolsContainer extends Component {
             <div style={{ margin: '10px auto', width: '16px', height: '16px', background: colorString, border: '1px solid #222' }}></div>
           </DraggablePanel>
           {this.state.showColorPicker && <DraggablePanel title="Color" x={10} y={200}>
-            <ChromePicker onChange={this.handleColorChange.bind(this)} />
+            <ChromePicker color={this.props.tool.color} onChangeComplete={this.handleColorChange.bind(this)} />
           </DraggablePanel>}
         </div>
     );

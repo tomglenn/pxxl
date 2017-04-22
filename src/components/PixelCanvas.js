@@ -178,8 +178,8 @@ class PixelCanvas extends Component {
   }
 
   getColorString(c, a) {
-    const alpha = a ? a : c[3];
-    return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
+    const alpha = a ? a : c.a;
+    return `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
   }
 
   render() {
