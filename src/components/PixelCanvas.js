@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './PixelCanvas.css';
 
 class PixelCanvas extends Component {
@@ -70,7 +71,7 @@ class PixelCanvas extends Component {
   }
 
   startDrawing() {
-    this.setState((state, props) => {
+    this.setState(() => {
       return { drawing: true };
     });
 
@@ -78,7 +79,7 @@ class PixelCanvas extends Component {
   }
 
   stopDrawing() {
-    this.setState((state, props) => {
+    this.setState(() => {
       return { drawing: false };
     });
   }
@@ -94,17 +95,11 @@ class PixelCanvas extends Component {
   }
 
   showCursor(show) {
-    this.setState((state, props) => {
+    this.setState(() => {
       return { drawCursor: show };
     });
 
-    setTimeout(function() { this.clearGrid() }.bind(this), 0);
-  }
-
-  setColor(r, g, b, a) {
-    this.setState((state, props) => {
-      return { color: [r, g, b, a] };
-    });
+    setTimeout(function() { this.clearGrid(); }.bind(this), 0);
   }
 
   drawPixel() {
@@ -140,7 +135,7 @@ class PixelCanvas extends Component {
     const x = Math.floor(event.layerX / this.props.zoom);
     const y = Math.floor(event.layerY / this.props.zoom);
 
-    this.setState((state, props) => {
+    this.setState(() => {
       return { x, y };
     });
 
@@ -168,12 +163,10 @@ class PixelCanvas extends Component {
         exportedData.data.push([id[0], id[1], id[2], id[3]]);
       }
     }
-
-    console.log(exportedData);
   }
 
   exportAsPng() {
-    window.location = this.editorCanvas.canvas.toDataURL("image/png");
+    window.location = this.editorCanvas.canvas.toDataURL('image/png');
   }
 
   getCalculatedWidth() {
@@ -203,15 +196,34 @@ class PixelCanvas extends Component {
   }
 }
 
+const colorPropType = PropTypes.shape({
+  r: PropTypes.number.isRequired,
+  g: PropTypes.number.isRequired,
+  b: PropTypes.number.isRequired,
+  a: PropTypes.number
+});
+
+PixelCanvas.propTypes = {
+  width: PropTypes.number,
+  height: PropTypes.number,
+  zoom: PropTypes.number,
+  color: colorPropType,
+  gridColor: colorPropType,
+  drawGrid: PropTypes.bool,
+  showCoords: PropTypes.bool,
+  showExport: PropTypes.bool,
+  tool: PropTypes.string
+};
+
 PixelCanvas.defaultProps = {
   width: 50,
   height: 50,
   zoom: 10,
-  color: [0, 0, 0, 1],
+  color: { r: 0, g: 0, b: 0, a: 1 },
+  gridColor: { r: 255, g: 255, b: 255, a: 0.1 },
   drawGrid: true,
-  gridColor: [255, 255, 255, 0.1],
   showCoords: false,
   showExport: false,
 };
 
-export default PixelCanvas
+export default PixelCanvas;

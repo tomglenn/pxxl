@@ -19,3 +19,5 @@
 .tool-button:focus {
   outline: none;
 }
+
+.color-popover { position: absolute; }

@@ -1,6 +1,6 @@
 const initialState = {
   type: 'PEN',
-  color: [0, 255, 0, 1]
+  color: { r: 0, g: 0, b: 0, a: 1 }
 };
 
 const reducer = function (state = initialState, action) {
@@ -8,6 +8,8 @@ const reducer = function (state = initialState, action) {
     case 'SET_PEN':
     case 'SET_ERASER':
       return { ...state, ...action.payload };
+    case 'SET_COLOR':
+      return { ...state, color: action.payload };
     default:
       return state;
   }

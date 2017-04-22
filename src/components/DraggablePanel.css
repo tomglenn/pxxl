@@ -1,8 +1,7 @@
 .panel {
   position: absolute;
   padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #111;
+  border: 1px solid #222;
   background: #444;
   z-index: 99;
 }
@@ -11,9 +10,7 @@
   display: block;
   margin: -10px -10px 10px -10px;
   padding: 5px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  background: #222;
+  background: #333;
   text-align: center;
   font-weight: bold;
   font-size: 0.8em;

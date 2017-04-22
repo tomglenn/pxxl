@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './DraggablePanel.css';
 
 class DraggablePanel extends Component {
@@ -35,7 +36,6 @@ class DraggablePanel extends Component {
   }
 
   onMouseOut(event) {
-    console.log('out');
     if (!this.state.dragging) {
       return;
     }
@@ -48,8 +48,7 @@ class DraggablePanel extends Component {
     });
   }
 
-  onMouseUp(event) {
-    console.log('foo');
+  onMouseUp() {
     this.setState({ dragging: false });
   }
 
@@ -68,8 +67,17 @@ class DraggablePanel extends Component {
           </div>
           {this.props.children}
         </div>
-    )
+    );
   }
 }
 
-export default DraggablePanel
+DraggablePanel.propTypes = {
+  x: PropTypes.number,
+  y: PropTypes.number,
+  width: PropTypes.number,
+  height: PropTypes.number,
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node
+};
+
+export default DraggablePanel;
