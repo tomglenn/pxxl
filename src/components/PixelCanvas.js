@@ -11,6 +11,28 @@ class PixelCanvas extends Component {
       drawing: false,
       drawCursor: false
     };
+    this.pixels = [];
+  }
+
+  updatePixels(width, height) {
+    const oldPixels = this.pixels;
+    this.pixels = [];
+
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        const pixelIndex = oldPixels.findIndex((p) => { return p.x === x && p.y === y; });
+        const newPixel = pixelIndex === -1 ? { x: x, y: y, c: { r: 0, g: 0, b: 0, a: 0 }} : oldPixels[pixelIndex];
+        this.pixels.push(newPixel);
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
+      this.updatePixels(this.props.width, this.props.height);
+      this.redrawEditor();
+      this.redrawGrid();
+    }
   }
 
   componentDidMount() {
@@ -26,7 +48,8 @@ class PixelCanvas extends Component {
 
     this.imageData = this.editorCanvas.ctx.createImageData(1, 1);
 
-    this.clearEditor();
+    this.updatePixels(this.props.width, this.props.height);
+    this.redrawEditor();
     this.redrawGrid();
 
     this.gridCanvas.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
@@ -111,8 +134,19 @@ class PixelCanvas extends Component {
     }
   }
 
-  clearEditor() {
+  redrawEditor() {
     this.editorCanvas.ctx.clearRect(0, 0, this.getCalculatedWidth(), this.getCalculatedHeight());
+
+    for (let x = 0; x < this.props.width; x++) {
+      for (let y = 0; y < this.props.height; y++) {
+        const pixel = this.pixels.find((p) => { return p.x === x && p.y === y; });
+        if (pixel === undefined) {
+          continue;
+        }
+
+        this.setPixel(pixel.x, pixel.y, pixel.c);
+      }
+    }
   }
 
   showCursor(show) {
@@ -154,19 +188,18 @@ class PixelCanvas extends Component {
       this.editorCanvas.ctx.fillStyle = this.getColorString(color);
       this.editorCanvas.ctx.fillRect(x * this.props.zoom, y * this.props.zoom, this.props.zoom, this.props.zoom);
     }
+
+    const pixelIndex = this.pixels.findIndex((p) => { return p.x === x && p.y === y; });
+    this.pixels[pixelIndex] = { x: x, y: y, c: color };
   }
 
   getPixel(x, y) {
     if (!this.editorCanvas.ctx || !this.imageData) {
-      return null;
+      return undefined;
     }
 
-    if (x < 0 || x > this.props.width - 1 || y < 0 || y > this.props.height - 1) {
-      return null;
-    }
-
-    const c = this.editorCanvas.ctx.getImageData(x * this.props.zoom, y * this.props.zoom, 1, 1).data;
-    return { r: c[0], g: c[1], b: c[2], a: c[3]/255 };
+    const pixel = this.pixels.find((p) => { return p.x === x && p.y === y; });
+    return pixel !== undefined ? pixel.c : undefined;
   }
 
   startFloodFill(x, y, color) {
@@ -197,22 +230,22 @@ class PixelCanvas extends Component {
       let northColor = this.getPixel(n.x, n.y - 1);
       let southColor = this.getPixel(n.x, n.y + 1);
 
-      if (westColor !== null && this.equalColor(westColor, targetColor)) {
+      if (westColor !== undefined && this.equalColor(westColor, targetColor)) {
         this.setPixel(n.x - 1, n.y, replacementColor);
         queue.push({ x: n.x - 1, y: n.y });
       }
 
-      if (eastColor !== null && this.equalColor(eastColor, targetColor)) {
+      if (eastColor !== undefined && this.equalColor(eastColor, targetColor)) {
         this.setPixel(n.x + 1, n.y, replacementColor);
         queue.push({ x: n.x + 1, y: n.y });
       }
 
-      if (northColor !== null && this.equalColor(northColor, targetColor)) {
+      if (northColor !== undefined && this.equalColor(northColor, targetColor)) {
         this.setPixel(n.x, n.y - 1, replacementColor);
         queue.push({ x: n.x, y: n.y - 1 });
       }
 
-      if (southColor != null && this.equalColor(southColor, targetColor)) {
+      if (southColor !== undefined && this.equalColor(southColor, targetColor)) {
         this.setPixel(n.x, n.y + 1, replacementColor);
         queue.push({ x: n.x, y: n.y + 1 });
       }
@@ -220,6 +253,10 @@ class PixelCanvas extends Component {
   }
 
   equalColor(c1, c2) {
+    if (!c1 || !c2) {
+      return false;
+    }
+
     return (c1.r === c2.r &&
             c1.g === c2.g &&
             c1.b === c2.b &&

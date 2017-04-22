@@ -21,6 +21,10 @@ class ToolsContainer extends Component {
     store.dispatch({ type: 'SET_COLOR', payload: color.rgb });
   }
 
+  setSize(width, height) {
+    store.dispatch({ type: 'SET_SIZE', payload: { width: width, height: height }});
+  }
+
   render() {
     const c = this.props.canvas.color;
     const colorStyle = {
@@ -39,6 +43,9 @@ class ToolsContainer extends Component {
             <ToolButton title="Flood Fill" icon="tint" handleClick={this.setTool.bind(this, 'FILL')} active={ this.props.canvas.tool === 'FILL' } />
             <hr style={{ borderColor: '#666' }} />
             <div style={colorStyle}></div>
+
+            <button onClick={this.setSize.bind(this, 10, 10)}>Set Size to 10x10</button>
+            <button onClick={this.setSize.bind(this, 20, 20)}>Set Size to 20x20</button>
           </DraggablePanel>
 
           {this.state.showColorPicker && <DraggablePanel title="Color" x={10} y={200}>
