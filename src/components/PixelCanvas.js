@@ -28,10 +28,10 @@ class PixelCanvas extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
+    if (this.props.width !== prevProps.width || this.props.height !== prevProps.height || this.props.showGrid !== prevProps.showGrid) {
       this.updatePixels(this.props.width, this.props.height);
       this.redrawEditor();
-      this.redrawGrid();
+      this.reshowGrid();
     }
   }
 
@@ -50,7 +50,7 @@ class PixelCanvas extends Component {
 
     this.updatePixels(this.props.width, this.props.height);
     this.redrawEditor();
-    this.redrawGrid();
+    this.reshowGrid();
 
     this.gridCanvas.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
     this.gridCanvas.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
@@ -77,7 +77,7 @@ class PixelCanvas extends Component {
     }
 
     this.showCursor(true);
-    this.redrawGrid();
+    this.reshowGrid();
   }
 
   onMouseOut() {
@@ -103,14 +103,14 @@ class PixelCanvas extends Component {
     }
   }
 
-  redrawGrid() {
+  reshowGrid() {
     const width = this.getCalculatedWidth();
     const height = this.getCalculatedHeight();
     const ctx = this.gridCanvas.ctx;
 
     this.gridCanvas.ctx.clearRect(0, 0, width, height);
 
-    if (this.props.drawGrid) {
+    if (this.props.showGrid) {
       ctx.strokeStyle = this.getColorString(this.props.gridColor);
 
       for (let x = 0; x < width; x += this.props.zoom) {
@@ -154,7 +154,7 @@ class PixelCanvas extends Component {
       return { drawCursor: show };
     });
 
-    setTimeout(function() { this.redrawGrid(); }.bind(this), 0);
+    setTimeout(function() { this.reshowGrid(); }.bind(this), 0);
   }
 
   startDrawing() {
@@ -325,7 +325,7 @@ PixelCanvas.propTypes = {
   zoom: PropTypes.number,
   color: colorPropType,
   gridColor: colorPropType,
-  drawGrid: PropTypes.bool,
+  showGrid: PropTypes.bool,
   showCoords: PropTypes.bool,
   showExport: PropTypes.bool,
   tool: PropTypes.string
@@ -337,7 +337,7 @@ PixelCanvas.defaultProps = {
   zoom: 10,
   color: { r: 0, g: 0, b: 0, a: 1 },
   gridColor: { r: 255, g: 255, b: 255, a: 0.1 },
-  drawGrid: true,
+  showGrid: true,
   showCoords: false,
   showExport: false,
 };

@@ -3,7 +3,9 @@ const initialState = {
   height: 20,
   zoom: 25,
   tool: 'PEN',
-  color: { r: 0, g: 0, b: 0, a: 1 }
+  color: { r: 0, g: 0, b: 0, a: 1 },
+  showGrid: true,
+  showExport: true
 };
 
 const reducer = function (state = initialState, action) {
@@ -14,6 +16,8 @@ const reducer = function (state = initialState, action) {
       return { ...state, color: action.payload };
     case 'SET_SIZE':
       return { ...state, width: action.payload.width, height: action.payload.height };
+    case 'TOGGLE_GRID':
+      return { ...state, showGrid: !state.showGrid };
     default:
       return state;
   }

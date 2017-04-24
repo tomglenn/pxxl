@@ -12,7 +12,9 @@ class PixelCanvasContainer extends Component {
                      height={this.props.canvas.height}
                      zoom={this.props.canvas.zoom}
                      tool={this.props.canvas.tool}
-                     color={this.props.canvas.color} />
+                     color={this.props.canvas.color}
+                     showGrid={this.props.canvas.showGrid}
+                     showExport={this.props.canvas.showExport} />
       </div>
     );
   }
