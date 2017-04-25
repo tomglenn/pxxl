@@ -15,7 +15,7 @@ class App extends Component {
           <Nav />
           <ToolsContainer />
           <PixelCanvasContainer />
-          <DraggablePanel title="About" x={10} y={620} width={200} >
+          <DraggablePanel title="About" x={10} y={450} width={200} >
             PXXL is an experimental React powered Pixel Editor developed by <a href="http://twitter.com/tomeglenn">Tom Glenn</a>
           </DraggablePanel>
         </div>

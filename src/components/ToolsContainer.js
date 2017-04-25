@@ -38,7 +38,6 @@ class ToolsContainer extends Component {
   }
 
   setNewSize() {
-    console.log('hi');
     store.dispatch({ type: 'SET_SIZE', payload: { width: this.state.width, height: this.state.height }});
   }
 
@@ -101,7 +100,7 @@ class ToolsContainer extends Component {
             <button onClick={this.setNewSize.bind(this)}>Set Size</button>
           </DraggablePanel>
 
-          {this.state.showColorPicker && <DraggablePanel title="Color" x={10} y={320}>
+          {this.state.showColorPicker && <DraggablePanel title="Color" x={160} y={60}>
             <ChromePicker color={this.props.canvas.color} onChangeComplete={this.handleColorChange.bind(this)} />
           </DraggablePanel>}
         </div>
