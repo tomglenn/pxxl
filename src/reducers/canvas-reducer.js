@@ -1,6 +1,6 @@
 const initialState = {
-  width: 20,
-  height: 20,
+  width: 32,
+  height: 32,
   zoom: 20,
   tool: 'PEN',
   color: { r: 0, g: 0, b: 0, a: 1 },
