@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import store from '../store';
 import PixelCanvas from './PixelCanvas';
 import './PixelCanvasContainer.css';
 
 class PixelCanvasContainer extends Component {
+  onSaved() {
+    store.dispatch({ type: 'TRIGGER_SAVED', payload: null });
+  }
+
   render() {
     return (
       <div className="canvas-container">
@@ -14,7 +19,9 @@ class PixelCanvasContainer extends Component {
                      tool={this.props.canvas.tool}
                      color={this.props.canvas.color}
                      showGrid={this.props.canvas.showGrid}
-                     showExport={this.props.canvas.showExport} />
+                     showExport={this.props.canvas.showExport}
+                     saving={this.props.canvas.saving}
+                     onSaved={this.onSaved.bind(this)} />
       </div>
     );
   }

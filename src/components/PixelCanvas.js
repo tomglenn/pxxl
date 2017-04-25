@@ -27,8 +27,30 @@ class PixelCanvas extends Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.saving && nextProps.saving) {
+      this.exportAsPng();
+      this.props.onSaved();
+    }
+
+    if (this.props.saving && !nextProps.saving) {
+      console.log('I finished saving');
+    }
+
+    // if (this.props.zoom !== nextProps.zoom) {
+    //   this.redrawEditor();
+    //   this.reshowGrid();
+    //   console.log('boom');
+    // }
+  }
+
   componentDidUpdate(prevProps) {
-    if (this.props.width !== prevProps.width || this.props.height !== prevProps.height || this.props.showGrid !== prevProps.showGrid) {
+    const sizeHasChanged = ((this.props.width !== prevProps.width) ||
+    (this.props.height !== prevProps.height) ||
+    (this.props.zoom !== prevProps.zoom) ||
+    (this.props.showGrid !== prevProps.showGrid));
+
+    if (sizeHasChanged) {
       this.updatePixels(this.props.width, this.props.height);
       this.redrawEditor();
       this.reshowGrid();
@@ -36,6 +58,11 @@ class PixelCanvas extends Component {
   }
 
   componentDidMount() {
+    this.realCanvas = {
+      canvas: this.refs.realCanvas,
+      ctx: this.refs.realCanvas.getContext('2d')
+    };
+
     this.editorCanvas = {
       canvas: this.refs.editorCanvas,
       ctx: this.refs.editorCanvas.getContext('2d')
@@ -178,15 +205,19 @@ class PixelCanvas extends Component {
   }
 
   setPixel(x, y, color) {
-    if (!this.editorCanvas.ctx || !this.imageData) {
+    if (!this.editorCanvas.ctx || !this.realCanvas.ctx || !this.imageData) {
       return;
     }
 
     this.editorCanvas.ctx.clearRect(x * this.props.zoom, y * this.props.zoom, this.props.zoom, this.props.zoom);
+    this.realCanvas.ctx.clearRect(x, y, 1, 1);
 
     if (color) {
       this.editorCanvas.ctx.fillStyle = this.getColorString(color);
       this.editorCanvas.ctx.fillRect(x * this.props.zoom, y * this.props.zoom, this.props.zoom, this.props.zoom);
+
+      this.realCanvas.ctx.fillStyle = this.getColorString(color);
+      this.realCanvas.ctx.fillRect(x, y, 1, 1);
     }
 
     const pixelIndex = this.pixels.findIndex((p) => { return p.x === x && p.y === y; });
@@ -194,19 +225,11 @@ class PixelCanvas extends Component {
   }
 
   getPixel(x, y) {
-    if (!this.editorCanvas.ctx || !this.imageData) {
-      return undefined;
-    }
-
     const pixel = this.pixels.find((p) => { return p.x === x && p.y === y; });
     return pixel !== undefined ? pixel.c : undefined;
   }
 
   startFloodFill(x, y, color) {
-    if (!this.editorCanvas.ctx || !this.imageData) {
-      return;
-    }
-
     const targetColor = this.getPixel(this.state.x, this.state.y);
     this.floodFill(this.state.x, this.state.y, targetColor, color);
   }
@@ -282,7 +305,11 @@ class PixelCanvas extends Component {
   }
 
   exportAsPng() {
-    window.location = this.editorCanvas.canvas.toDataURL('image/png');
+    let data = this.realCanvas.canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.setAttribute('download', 'pixels.png');
+    a.setAttribute('href', data);
+    a.click();
   }
 
   getCalculatedWidth() {
@@ -305,6 +332,7 @@ class PixelCanvas extends Component {
         {this.props.showCoords &&
           <div className="canvas-coords">(x: {this.state.x}, y: {this.state.y})</div>
         }
+        <canvas className="real-canvas" ref="realCanvas" width={this.props.width} height={this.props.height} style={{ display: 'none' }}></canvas>
         <canvas className="editor-canvas" ref="editorCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()}></canvas>
         <canvas className="grid-canvas" ref="gridCanvas" width={this.getCalculatedWidth()} height={this.getCalculatedHeight()}></canvas>
       </div>
@@ -328,7 +356,9 @@ PixelCanvas.propTypes = {
   showGrid: PropTypes.bool,
   showCoords: PropTypes.bool,
   showExport: PropTypes.bool,
-  tool: PropTypes.string
+  tool: PropTypes.string,
+  saving: PropTypes.bool,
+  onSaved: PropTypes.func
 };
 
 PixelCanvas.defaultProps = {
@@ -340,6 +370,8 @@ PixelCanvas.defaultProps = {
   showGrid: true,
   showCoords: false,
   showExport: false,
+  tool: 'PEN',
+  saving: false
 };
 
 export default PixelCanvas;
