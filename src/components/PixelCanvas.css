@@ -11,15 +11,6 @@
   position: relative;
   top: 0;
   left: 0;
-  z-index: 1;
-  border: 2px solid transparent;
-}
-
-.grid-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  cursor: crosshair;
   border: 2px dashed #555;
+  cursor: crosshair;
 }
