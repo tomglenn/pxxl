@@ -90,27 +90,35 @@ class PixelCanvas extends Component {
     }
   }
 
-  redrawEditor() {
-    this.editorCanvas.ctx.clearRect(0, 0, this.getCalculatedWidth(), this.getCalculatedHeight());
+  resetCanvasScale() {
+    const ctx = this.editorCanvas.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(this.props.zoom, this.props.zoom);
+  }
 
-    let startY = 0;
-    let lastColor = undefined;
+  redrawEditor() {
+    const ctx = this.editorCanvas.ctx;
+
+    ctx.clearRect(0, 0, this.props.width, this.props.height);
+
+    this.resetCanvasScale();
 
     for (let x = 0; x < this.props.width; x++) {
-      startY = 0;
       for (let y = 0; y < this.props.height; y++) {
-        let newColor = this.pixels[this.props.width * y + x];
-
-        const colorsEqual = this.equalColor(lastColor, newColor);
-        if ((!colorsEqual || y === this.props.height - 1) && y !== 0 ) {
-          this.editorCanvas.ctx.fillStyle = this.getColorString(lastColor);
-          this.editorCanvas.ctx.fillRect(x * this.props.zoom, startY * this.props.zoom, this.props.zoom, this.props.zoom * (1 + y - startY));
-          startY = y;
-        }
-
-        lastColor = newColor;
+        const c = this.pixels[this.props.width * y + x] || { r: 0, g: 0, b: 0, a: 0 };
+        ctx.fillStyle = this.getColorString(c);
+        ctx.fillRect(x, y, 1, 1);
       }
     }
+
+    // for (let x = 0; x < this.props.width; x++) {
+    //   let startY = 0;
+    //   let lastColor = undefined;
+    //
+    //   for (let y = 0; y < this.props.height; y++) {
+    //
+    //   }
+    // }
   }
 
   startDrawing() {
@@ -134,15 +142,14 @@ class PixelCanvas extends Component {
   }
 
   setPixelImmediate(x, y, color) {
-    if (!this.editorCanvas.ctx) {
-      return;
-    }
+    const ctx = this.editorCanvas.ctx;
 
-    this.editorCanvas.ctx.clearRect(x * this.props.zoom, y * this.props.zoom, this.props.zoom, this.props.zoom);
+    this.resetCanvasScale();
+    ctx.clearRect(x, y, 1, 1);
 
     if (color) {
       this.editorCanvas.ctx.fillStyle = this.getColorString(color);
-      this.editorCanvas.ctx.fillRect(x * this.props.zoom, y * this.props.zoom, this.props.zoom, this.props.zoom);
+      this.editorCanvas.ctx.fillRect(x, y, 1, 1);
     }
 
     this.setPixel(x, y, color);
