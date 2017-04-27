@@ -148,11 +148,12 @@ class PixelCanvas extends Component {
     const ctx = this.editorCanvas.ctx;
 
     this.resetCanvasScale();
+
     ctx.clearRect(x, y, 1, 1);
 
     if (color) {
-      this.editorCanvas.ctx.fillStyle = this.getColorString(color);
-      this.editorCanvas.ctx.fillRect(x, y, 1, 1);
+      ctx.fillStyle = this.getColorString(color);
+      ctx.fillRect(x, y, 1, 1);
     }
 
     this.setPixel(x, y, color);
