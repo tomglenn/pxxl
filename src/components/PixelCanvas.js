@@ -97,31 +97,45 @@ class PixelCanvas extends Component {
   }
 
   redrawEditor() {
+    const startTime = Date.now();
     const ctx = this.editorCanvas.ctx;
-    const imageData = ctx.createImageData(this.getCalculatedWidth(), this.getCalculatedHeight());
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, this.getCalculatedWidth(), this.getCalculatedHeight());
+    this.resetCanvasScale();
+    ctx.clearRect(0, 0, this.props.width, this.props.height);
     for (let x = 0; x < this.props.width; x++) {
       for (let y = 0; y < this.props.height; y++) {
         const c = this.pixels[this.props.width * y + x] || { r: 0, g: 0, b: 0, a: 0 };
-
-        for (let pixelX = 0; pixelX < this.props.zoom; pixelX++) {
-          for (let pixelY = 0; pixelY < this.props.zoom; pixelY++) {
-            const currentX = (x * this.props.zoom) + pixelX;
-            const currentY = (y * this.props.zoom) + pixelY;
-            const startPosition = 4 * (this.getCalculatedWidth() * currentY + currentX);
-
-            imageData.data[startPosition] = c.r;
-            imageData.data[startPosition + 1] = c.g;
-            imageData.data[startPosition + 2] = c.b;
-            imageData.data[startPosition + 3] = c.a * 255;
-          }
-        }
+        ctx.fillStyle = this.getColorString(c);
+        ctx.fillRect(x, y, 1, 1);
       }
     }
 
-    ctx.putImageData(imageData, 0, 0);
+    // const imageData = ctx.createImageData(this.getCalculatedWidth(), this.getCalculatedHeight());
+    // ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // ctx.clearRect(0, 0, this.getCalculatedWidth(), this.getCalculatedHeight());
+    // for (let x = 0; x < this.props.width; x++) {
+    //   for (let y = 0; y < this.props.height; y++) {
+    //     const c = this.pixels[this.props.width * y + x] || { r: 0, g: 0, b: 0, a: 0 };
+    //
+    //     for (let pixelX = 0; pixelX < this.props.zoom; pixelX++) {
+    //       for (let pixelY = 0; pixelY < this.props.zoom; pixelY++) {
+    //         const currentX = (x * this.props.zoom) + pixelX;
+    //         const currentY = (y * this.props.zoom) + pixelY;
+    //         const startPosition = 4 * (this.getCalculatedWidth() * currentY + currentX);
+    //
+    //         imageData.data[startPosition] = c.r;
+    //         imageData.data[startPosition + 1] = c.g;
+    //         imageData.data[startPosition + 2] = c.b;
+    //         imageData.data[startPosition + 3] = c.a * 255;
+    //       }
+    //     }
+    //   }
+    // }
+
+    const endTime = Date.now();
+    console.log('Took: ' + ((endTime - startTime)) + 'ms');
+
+    //ctx.putImageData(imageData, 0, 0);
   }
 
   startDrawing() {
