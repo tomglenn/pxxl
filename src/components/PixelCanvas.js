@@ -98,27 +98,30 @@ class PixelCanvas extends Component {
 
   redrawEditor() {
     const ctx = this.editorCanvas.ctx;
+    const imageData = ctx.createImageData(this.getCalculatedWidth(), this.getCalculatedHeight());
 
-    ctx.clearRect(0, 0, this.props.width, this.props.height);
-
-    this.resetCanvasScale();
-
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.getCalculatedWidth(), this.getCalculatedHeight());
     for (let x = 0; x < this.props.width; x++) {
       for (let y = 0; y < this.props.height; y++) {
         const c = this.pixels[this.props.width * y + x] || { r: 0, g: 0, b: 0, a: 0 };
-        ctx.fillStyle = this.getColorString(c);
-        ctx.fillRect(x, y, 1, 1);
+
+        for (let pixelX = 0; pixelX < this.props.zoom; pixelX++) {
+          for (let pixelY = 0; pixelY < this.props.zoom; pixelY++) {
+            const currentX = (x * this.props.zoom) + pixelX;
+            const currentY = (y * this.props.zoom) + pixelY;
+            const startPosition = 4 * (this.getCalculatedWidth() * currentY + currentX);
+
+            imageData.data[startPosition] = c.r;
+            imageData.data[startPosition + 1] = c.g;
+            imageData.data[startPosition + 2] = c.b;
+            imageData.data[startPosition + 3] = c.a * 255;
+          }
+        }
       }
     }
 
-    // for (let x = 0; x < this.props.width; x++) {
-    //   let startY = 0;
-    //   let lastColor = undefined;
-    //
-    //   for (let y = 0; y < this.props.height; y++) {
-    //
-    //   }
-    // }
+    ctx.putImageData(imageData, 0, 0);
   }
 
   startDrawing() {
@@ -173,15 +176,13 @@ class PixelCanvas extends Component {
     for (let x = 0; x < maxX; x++) {
       for (let y = 0; y < maxY; y++) {
         const oldPixel = oldPixels[prevProps.width * y + x];
-        if (oldPixel) {
-          this.pixels[this.props.width * y + x] = oldPixel;
-        }
+        this.pixels[this.props.width * y + x] = oldPixel;
       }
     }
   }
 
   floodFill(x, y, replacementColor) {
-    const targetColor = this.getPixel(this.state.x, this.state.y);
+    const targetColor = this.getPixel(x, y);
     if (this.equalColor(targetColor, replacementColor)) {
       return;
     }
@@ -196,28 +197,32 @@ class PixelCanvas extends Component {
       queue.splice(0, 1);
 
       if (n.x - 1 >= 0) {
-        if (this.equalColor(this.getPixel(n.x - 1, n.y), targetColor)) {
+        let westColor = this.getPixel(n.x - 1, n.y);
+        if (this.equalColor(westColor, targetColor)) {
           this.setPixel(n.x - 1, n.y, replacementColor);
           queue.push({ x: n.x - 1, y: n.y });
         }
       }
 
       if (n.x + 1 < this.props.width) {
-        if (this.equalColor(this.getPixel(n.x + 1, n.y), targetColor)) {
+        let eastColor = this.getPixel(n.x + 1, n.y);
+        if (this.equalColor(eastColor, targetColor)) {
           this.setPixel(n.x + 1, n.y, replacementColor);
           queue.push({ x: n.x + 1, y: n.y });
         }
       }
 
       if (n.y - 1 >= 0) {
-        if (this.equalColor(this.getPixel(n.x, n.y - 1), targetColor)) {
+        let southColor = this.getPixel(n.x, n.y - 1);
+        if (this.equalColor(southColor, targetColor)) {
           this.setPixel(n.x, n.y - 1, replacementColor);
           queue.push({ x: n.x, y: n.y - 1 });
         }
       }
 
       if (n.y + 1 < this.props.height) {
-        if (this.equalColor(this.getPixel(n.x, n.y + 1), targetColor)) {
+        let northColor = this.getPixel(n.x, n.y + 1);
+        if (this.equalColor(northColor, targetColor)) {
           this.setPixel(n.x, n.y + 1, replacementColor);
           queue.push({ x: n.x, y: n.y + 1 });
         }
